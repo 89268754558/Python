@@ -118,4 +118,4 @@ Successfully installed oauthlib-2.1.0 requests-oauthlib-1.0.0 tweepy-3.6.0
 Отзывы, предложения, пожелания можете отправлять мне прямо :
 * [В телеграмм](https://t.me/Vlasov_Evgeny)
 * На почту *evgeny_vlasov@yahoo.com*
-* В гугл-форм, которую я сюда прикреплю чуть позже:)
+* [В эту гугл форму](https://goo.gl/forms/s5Ig99A6QikMuiXs1) 
