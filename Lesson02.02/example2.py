@@ -2,6 +2,24 @@ import requests as r
 from bs4 import BeautifulSoup as bs
 import time
 from tqdm import tqdm
+import sqlite3
+
+####SQLITE PART STARTED###########
+
+conn = sqlite3.connect('hh_parse.db') 
+cur = conn.cursor() 
+
+def db_creation():
+    cur.execute("CREATE TABLE IF NOT EXISTS  parseData (lang TEXT,title TEXT, href TEXT, company TEXT)")
+
+
+def dynamic_data_add(lang, title, href, company):
+    cur.execute("INSERT INTO parseData VALUES('%s', '%s','%s', '%s')"%(lang, title, href, company))
+    conn.commit()
+
+#####SQLITE PART FINISHED#######
+
+
 
 
 def find_count(language):
@@ -16,7 +34,7 @@ def find_count(language):
         except :
             return -1
 
-def parser(base_url, headers, jobs):
+def parser(language, base_url, headers, jobs):
     print("Parser is working!")
     #jobs = [];
     session = r.Session()
@@ -33,6 +51,10 @@ def parser(base_url, headers, jobs):
                 jobs.append(
                     {'title':title, 'href':href, 'company':company} #+ append all previous items
                 )
+
+                dynamic_data_add(language, title, href, company)
+
+
                 
             except :
                 pass
@@ -50,9 +72,20 @@ def parse_all(language):
     url_worked = url_changer(language)
     for i in range(0, last_page):
         url = url_worked[:-1] + str(i)
-        parser(url, headers, jobs)
+        parser(language , url, headers, jobs)
 
     return jobs
 
+
+
+
+
+
+
+
 headers = {"accept":"*/*" ,"user-agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36"}
-print(parse_all("Сварщик"))
+print(parse_all("Php"))
+
+
+cur.close()
+conn.close()  
