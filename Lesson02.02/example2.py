@@ -20,7 +20,7 @@ def dynamic_data_add(lang, title, href, company):
 #####SQLITE PART FINISHED#######
 
 
-
+db_creation()
 
 def find_count(language):
     url = "https://hh.ru/search/vacancy?search_period=30&clusters=true&area=1&text=%s&enable_snippets=true&page=0"%(language)
