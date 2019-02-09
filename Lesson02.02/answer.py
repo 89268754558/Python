@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup as bs
 import time
 from tqdm import tqdm
 import sqlite3
+import helper2 as h
+import matpl as m
 
 ####SQLITE PART STARTED###########
 
@@ -10,12 +12,13 @@ conn = sqlite3.connect('hh_parse.db')
 cur = conn.cursor() 
 
 def db_creation():
-    cur.execute("CREATE TABLE IF NOT EXISTS  parseData (lang TEXT,title TEXT, href TEXT, company TEXT, req TEXT, comp TEXT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS  parseData (lang TEXT,title TEXT, href TEXT, company TEXT, requirements TEXT, salary REAL)")
 
 
 def dynamic_data_add(lang, title, href, company, req, comp):
-    cur.execute("INSERT INTO parseData VALUES('%s', '%s','%s', '%s','%s', '%s')"%(lang, title, href, company,req,comp))
+    cur.execute("INSERT INTO parseData VALUES('%s', '%s','%s', '%s','%s', %f)"%(lang, title, href, company,req,comp))
     conn.commit()
+    #print("Commit done")
 
 #####SQLITE PART FINISHED#######
 
@@ -32,10 +35,10 @@ def find_count(language):
             pager = soup.find_all("a", attrs = {"data-qa":"pager-page"})
             return int(pager[-1].text)-1
         except :
-            return -1
+            return 0
 
 def parser(language, base_url, headers, jobs):
-    print("Parser is working!")
+    #print("Parser is working!")
     #jobs = [];
     session = r.Session()
     request = session.get(base_url, headers=headers)
@@ -48,10 +51,17 @@ def parser(language, base_url, headers, jobs):
                 title = div.find('a',attrs = {'data-qa':'vacancy-serp__vacancy-title'}).text
                 href = div.find('a',attrs = {'data-qa':'vacancy-serp__vacancy-title'})['href']
                 company = div.find('a', attrs = {'data-qa':'vacancy-serp__vacancy-employer'}).text
-                compensation = div.find('a', attrs = {'data-qa':'vacancy-serp__vacancy-compensation'}).text
-                requirements = div.find('a', attrs = {'data-qa':'vacancy-serp__vacancy_snippet_requirement'}).text
+                compensation = div.find('div', attrs = {'data-qa':'vacancy-serp__vacancy-compensation'}).text
+                requirements = div.find('div', attrs = {'data-qa':'vacancy-serp__vacancy_snippet_requirement'}).text
+                #print(h.salary_parser(compensation))
+                #print(h.salary_parser(compensation))
 
-                dynamic_data_add(language, title, href, company,compensation, requirements)  
+ 
+
+                #print(compensation, requirements)
+
+                dynamic_data_add(language, title, href, company, requirements, h.salary_parser(compensation)) 
+
             except :
                 pass
     else:
@@ -69,7 +79,6 @@ def parse_all(language):
         url = url_worked[:-1] + str(i)
         parser(language , url, headers, jobs)
 
-    return jobs
 
 
 
@@ -81,10 +90,12 @@ def parse_all(language):
 headers = {"accept":"*/*" ,"user-agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36"}
 #print(parse_all("Php"))
 
-languages = ['Python','Golang','JavaScript','Rust','Ruby','Java','PHP','Haskel']
-for i in languages:
+languages = ['Golang', 'JavaScript','Python','R','Ruby','Java','C++','PHP','Swift','C#','Haskell','Rust','Химик','Сварщик','Водитель','Курьер','DevOps','Менеджер']
+for i in tqdm(languages):
     parse_all(i)
+    m.plotter(i)
 
 
 cur.close()
 conn.close()  
+
